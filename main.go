@@ -12,7 +12,7 @@ import (
 	"github.com/maikpro/mangadownloader/services"
 )
 
-type Config struct {
+type Args struct {
 	IsList        bool
 	ChapterNumber uint
 	IsLocal       bool
@@ -20,37 +20,37 @@ type Config struct {
 }
 
 func main() {
-	var config Config
-	config.parseCLI()
+	var args Args
+	args.parseCLI()
 
-	if config.IsList {
+	if args.IsList {
 		arcs, err := services.GetArcList()
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
-		config.ChapterNumber = showArcList(arcs)
+		args.ChapterNumber = showArcList(arcs)
 	}
 
-	if config.ChapterNumber == 0 {
+	if args.ChapterNumber == 0 {
 		log.Fatal("chapterNumber is not provided...")
 		os.Exit(1)
 	}
-	log.Printf("You have selected %d", config.ChapterNumber)
-	if config.IsLocal {
+	log.Printf("You have selected %d", args.ChapterNumber)
+	if args.IsLocal {
 		var path *string
 		action := func() {
-			path = useLocally(&config.ChapterNumber)
+			path = useLocally(&args.ChapterNumber)
 		}
-		spinner.New().Title(fmt.Sprintf("Downloading Chapter %d locally", config.ChapterNumber)).Action(action).Run()
+		spinner.New().Title(fmt.Sprintf("Downloading Chapter %d locally", args.ChapterNumber)).Action(action).Run()
 		log.Printf("✅ Saved Chapter locally at %s\n", *path)
 	}
 
-	if config.IsTelegram {
+	if args.IsTelegram {
 		action := func() {
-			useTelegram(&config.ChapterNumber)
+			useTelegram(&args.ChapterNumber)
 		}
-		spinner.New().Title(fmt.Sprintf("Sending Chapter %d to Telegram", config.ChapterNumber)).Action(action).Run()
+		spinner.New().Title(fmt.Sprintf("Sending Chapter %d to Telegram", args.ChapterNumber)).Action(action).Run()
 		log.Println("✅ Sent Chapter to your Telegram Chat")
 	}
 
@@ -75,7 +75,7 @@ func useLocally(chapterNumber *uint) *string {
 	return path
 }
 
-func (c *Config) parseCLI() {
+func (c *Args) parseCLI() {
 	flag.UintVar(&c.ChapterNumber, "chapterNumber", 0, "ChapterNumber that has to be downloaded from onepiece-tube.com/manga/kapitel-mangaliste")
 	flag.BoolVar(&c.IsLocal, "local", false, "set true if you want to download chapters useLocally on your computer. Don't forget setting the chapterNumber")
 	flag.BoolVar(&c.IsList, "list", false, "show all current one piece manga chapters from onepiece-tube.com")
